@@ -1027,13 +1027,130 @@ println concat("One","Little pig")
     println mult
     ```
 
+- Curry and default arguments
+
+  ```groovy
+  def log = { String type, Date createdOn, String msg ->
+      println "$createdOn [$type] - $msg"
+  }
+  
+  log("DEBUG",new Date(),"This is my first debug statement...")
+  
+  def debugLog = log.curry("DEBUG")
+  debugLog(new Date(), "This is another debug statement...")
+  debugLog(new Date(), "This is one more...")
+  
+  def todayDebugLog = log.curry("DEBUG",new Date())
+  todayDebugLog("This is today's debug msg")
+  
+  // right curry
+  def crazyPersonLog = log.rcurry("Why am I logging this way")
+  crazyPersonLog("ERROR",new Date())
+  
+  // index based currying
+  def typeMsgLog = log.ncurry(1,new Date())
+  typeMsgLog("ERROR","This is using ncurry...")
+  
+  
+  def defaultLog = { String type="DEBUG", Date createdOn=new Date(), String msg ->
+      println "$createdOn [$type] - $msg"
+  }
+  
+  defaultLog("This is my message")
+  ```
+
+- Collections and closures
+
+  1. iterate
+
+  ```groovy
+  // each & eachWithIndex
+  List favNums = [2,21,44,35,8,4]
+  
+  for(num in favNums) {
+      println num
+  }
+  
+  for( int i=0; i<favNums.size(); i++){
+      println "$i:${favNums[i]}"
+  }
+  
+  favNums.each { println it }
+  
+  favNums.eachWithIndex { num, idx ->
+      println "$idx:$num"
+  }
+  ```
+
+  2. find and find all in lists
+
+```groovy
+// findAll
+List days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+List weekend = days.findAll { it.startsWith("S") }
+
+println days
+println weekend
+```
+
+3. Collect
+
+   ```groovy
+   // collect
+   List nums = [1,2,2,7,2,8,2,4,6]
+   
+   List numsTimesTen = []
+   nums.each { num ->
+       numsTimesTen << num * 10
+   }
+   
+   List newTimesTen = nums.collect { num -> num * 10 }
+   
+   println nums
+   println numsTimesTen
+   println newTimesTen
+   ```
+
+4. Map functions
+
+   ```groovy
+   def person = [first:"Alex",last:"Rongas",email:"a.rongas@gmail.com"]
+   
+   person.each { entry ->
+       println entry
+   }
+   
+   person.each { k, v ->
+       println "$k:$v"
+   }
+   
+   
+   // map | filter | reduce
+   class Person {
+       String name
+       int age
+   }
+   
+   def people = [
+           new Person(name:"Joe", age:45),
+           new Person(name:"Mary", age:35),
+           new Person(name:"Andrew", age:25)
+   ]
+   
+   assert people
+           .findAll { it.age < 40 }
+           .collect {it.name.toUpperCase() }
+           .sort()
+           .join(', ') == "ANDREW, MARY"
+   ```
 
 
-Closure  scopes:
 
-- ths: corresponds to the enclosing class where closure is defined
+- Closure  scopes:
 
-- owner: corresponds to the enclosing object where the closure is defined <u>which may be a class or a closure</u>
+  - ths: corresponds to the enclosing class where closure is defined
+
+  - owner: corresponds to the enclosing object where the closure is defined <u>which may be a class or a closure</u>
 
   ```groovy
   class Scope{
@@ -1056,7 +1173,7 @@ Closure  scopes:
 
   
 
-- delegate: corresponds to a third party object where method calls or properties are resolved whenever the receiver of the class is not defined
+  - delegate: corresponds to a third party object where method calls or properties are resolved whenever the receiver of the class is not defined
 
   ```groovy
   def writer ={
